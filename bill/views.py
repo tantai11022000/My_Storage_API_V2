@@ -59,36 +59,45 @@ def create_bill(request):
     with transaction.atomic():
         try:
             bill = NewBillSerializer(data=dataBill)
-            if bill.is_valid():
-                bill.save()
-                mybill = Bill.objects.get(code=code)
-                for data in dataDetail:
-                    try:
-                        good = Goods.objects.get(
-                            code=str(data.get("codegood")))
-                        detail = {
-                            "amount": int(data.get("amount")),
-                            "price": good.getPrice(),
-                            "billCode": mybill.pk,
-                            "codeGood": good.pk
-                        }
-                    except:
-                        return Response({"message": "Mã mặt hàng {} có vấn đề".format(
-                            data.get("codegood")), "error": True})
-                    billDetail = NewBillDetailSerializer(data=detail)
-                    if not billDetail.is_valid(raise_exception=True):
-                        return Response({"message": "Thông tin mặt hàng {} có vấn đề".format(
-                            good.name), "error": True})
-                    else:
+            try:
+                if bill.is_valid():
+                    bill.save()
+                    mybill = Bill.objects.get(code=code)
+            except:
+                return Response({"message": "Không thể tạo hóa đơn", "error": True})
+            for data in dataDetail:
+                try:
+                    good = Goods.objects.get(
+                        code=str(data.get("codegood")))
+                    detail = {
+                        "amount": int(data.get("amount")),
+                        "price": good.getPrice(),
+                        "billCode": mybill.pk,
+                        "codeGood": good.pk
+                    }
+                except:
+                    mybill.delete()
+                    return Response({"message": "Mã mặt hàng {} có vấn đề".format(
+                        data.get("codegood")), "error": True})
+                billDetail = NewBillDetailSerializer(data=detail)
+                try:
+                    if billDetail.is_valid():
                         billDetail.save()
                         serializer = GoodsSerializer(
                             good, data={'quantity': good.getQuantity() - int(data.get("amount"))}, partial=True)
-                        if serializer.is_valid(raise_exception=True):
-                            serializer.save()
-                        else:
+                        try:
+                            if serializer.is_valid():
+                                serializer.save()
+                        except:
+                            mybill.delete()
                             return Response({"message": "Số lượng hàng {} không đủ".format(
                                 good.name), "error": True})
+                except:
+                    mybill.delete()
+                    return Response({"message": "Thông tin mặt hàng {} có vấn đề".format(
+                        good.name), "error": True})
         except:
+            mybill.delete()
             return Response({"message": "Đã xảy ra lỗi khi thêm đơn hàng", "error": True})
 
     return Response({"message": "Đặt hàng thành công", "error": False})
