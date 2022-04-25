@@ -2,4 +2,5 @@
 /user/__pycache__
 /user/migrations
 /db.sqlite3
-
+/bill/__pycache__
+/bill/migrations

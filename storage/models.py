@@ -2,7 +2,7 @@ import os
 from django.db import models
 
 from My_Storage_API.settings import MEDIA_ROOT, MEDIA_URL
-
+from django.core.validators import MinValueValidator
 
 # Create your models here.
 
@@ -30,7 +30,7 @@ class Goods(models.Model):
     code = models.CharField(max_length=200, unique=True)
     barcode = models.CharField(max_length=200, blank=True)
     barcode_img = models.ImageField(blank=True, null=True, upload_to=locate_barcode_img_upload)
-    quantity = models.CharField(max_length=200)
+    quantity = models.IntegerField(validators=[MinValueValidator(0)])
     price = models.CharField(max_length=200)
     kind = models.ForeignKey(TypeGoods, on_delete=models.SET_NULL, null=True, blank=True)
     desc = models.TextField(blank=True)
@@ -39,6 +39,10 @@ class Goods(models.Model):
     color = models.CharField(max_length=100)
     def __str__(self):
         return self.code
+    def getPrice(self):
+        return float(self.price)
+    def getQuantity(self):
+        return int(self.quantity)
 
 class ImgGoods(models.Model):
     img = models.ImageField(upload_to=locate_img_upload, blank=True, null=True)

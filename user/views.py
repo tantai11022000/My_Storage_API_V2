@@ -93,6 +93,7 @@ def create_customer(request):
     if checkCustomerByEmail(request.data.get("email")) == 1:
         return Response({"message":"Email đã tồn tại","error":True})
     serializer = CustomerSerializer(data = request.data)
+    print(serializer)
     if serializer.is_valid():
         serializer.save()
         return Response({"message":"Đăng ký thành công","error":False})
