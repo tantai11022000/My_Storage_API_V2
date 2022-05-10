@@ -1,3 +1,4 @@
+from multiprocessing import context
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import GoodsSerializer, ImgGoodsSerializer
@@ -21,7 +22,7 @@ def get_list_goods(request,offset,limit):
         colors = request.GET["colors"]
     except:
         listGoods = Goods.objects.all()[offset:total]
-        serializers = GoodsSerializer(listGoods,many=True)
+        serializers = GoodsSerializer(listGoods,many=True,context = {'request': request})
         return Response(serializers.data)
     amountCategories = 0
     amountColors = 0
@@ -42,7 +43,7 @@ def get_list_goods(request,offset,limit):
             listGoods = Goods.objects.filter(colorCritical)[offset:total]
         else:    
             listGoods = Goods.objects.filter(kind__in=listCategories).filter(colorCritical)[offset:total]
-    serializers = GoodsSerializer(listGoods,many=True)
+    serializers = GoodsSerializer(listGoods,many=True,context = {'request': request})
     return Response(serializers.data)
 
 @api_view(["GET"])

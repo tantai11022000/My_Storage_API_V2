@@ -1,5 +1,9 @@
+from multiprocessing import context
 from pkg_resources import require
+from requests import request
 from rest_framework import serializers
+
+from My_Storage_API.settings import BASE_DIR
 from .models import Goods,TypeGoods,ImgGoods
 
 
